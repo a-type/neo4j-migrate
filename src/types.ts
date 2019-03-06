@@ -83,3 +83,8 @@ export type Migration = {
   constraints: ConstraintChangeSet[];
   cyphers: CypherChangeSet[];
 };
+
+export enum MigrationDirection {
+  Up,
+  Down
+}
