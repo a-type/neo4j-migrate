@@ -3,7 +3,9 @@ import {
   CypherChangeSet,
   ChangeSetKind,
   IndexChangeSet,
-  ConstraintChangeSet
+  ConstraintChangeSet,
+  NodeLabelPropertyIndex,
+  Neo4jIndexOrConstraintType
 } from './types';
 
 export const isCypherChangeSet = (changeSet: ChangeSet): changeSet is CypherChangeSet =>
@@ -12,5 +14,5 @@ export const isCypherChangeSet = (changeSet: ChangeSet): changeSet is CypherChan
 export const isIndexChangeSet = (changeSet: ChangeSet): changeSet is IndexChangeSet =>
   changeSet.kind === ChangeSetKind.Index;
 
-export const isContraintChangeSet = (changeSet: ChangeSet): changeSet is ConstraintChangeSet =>
+export const isConstraintChangeSet = (changeSet: ChangeSet): changeSet is ConstraintChangeSet =>
   changeSet.kind === ChangeSetKind.Constraint;

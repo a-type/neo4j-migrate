@@ -7,62 +7,59 @@ import {
 } from './types';
 import { isCypherChangeSet, isIndexChangeSet } from './guards';
 
-export const indexChangeSetToCypher = (
-  { index, operation }: IndexChangeSet,
-  up: boolean
-): string => {
-  const create = operation === ChangeSetOperationType.Apply ? up : !up;
+const isCreate = (changeset: IndexChangeSet | ConstraintChangeSet, up: boolean) =>
+  !changeset.operation || changeset.operation === ChangeSetOperationType.Create ? up : !up;
 
-  if (create) {
-    switch (index.type) {
+export const indexChangeSetToCypher = (changeset: IndexChangeSet, up: boolean): string => {
+  if (isCreate(changeset, up)) {
+    switch (changeset.type) {
       case Neo4jIndexOrConstraintType.NodeLabelProperty:
-        return `CREATE INDEX ON :${index.label}(${index.properties.join(',')})`;
+        return `CREATE INDEX ON :${changeset.label}(${changeset.properties.join(',')})`;
       case Neo4jIndexOrConstraintType.NodeFulltext:
+        if (!changeset.labels || !changeset.properties) {
+          throw new Error(`Label and properties are required for creating fulltext indexes`);
+        }
         return `CALL db.index.fulltext.createNodeIndex(${JSON.stringify(
-          index.name
-        )},${JSON.stringify(index.labels)},${JSON.stringify(index.properties)})`;
+          changeset.name
+        )},${JSON.stringify(changeset.labels)},${JSON.stringify(changeset.properties)})`;
       case Neo4jIndexOrConstraintType.RelationshipFulltext:
         return `CALL db.index.fulltext.createRelationshipIndex(${JSON.stringify(
-          index.name
-        )},${JSON.stringify(index.realtionshipTypes)},${JSON.stringify(index.properties)})`;
+          changeset.name
+        )},${JSON.stringify(changeset.relationshipTypes)},${JSON.stringify(changeset.properties)})`;
     }
   } else {
-    switch (index.type) {
+    switch (changeset.type) {
       case Neo4jIndexOrConstraintType.NodeLabelProperty:
-        return `DROP INDEX ON :${index.label}(${index.properties.join(',')})`;
+        return `DROP INDEX ON :${changeset.label}(${changeset.properties.join(',')})`;
       case Neo4jIndexOrConstraintType.NodeFulltext:
-        return `CALL db.index.fulltext.deleteNodeIndex(${JSON.stringify(index.name)})`;
+        return `CALL db.index.fulltext.deleteNodeIndex(${JSON.stringify(changeset.name)})`;
       case Neo4jIndexOrConstraintType.RelationshipFulltext:
-        return `CALL db.index.fulltext.deleteRelationshipIndex(${JSON.stringify(index.name)})`;
+        return `CALL db.index.fulltext.deleteRelationshipIndex(${JSON.stringify(changeset.name)})`;
     }
   }
 
-  throw new Error(`Index type is not supported: ${JSON.stringify(index)}`);
+  throw new Error(`Index type is not supported: ${JSON.stringify(changeset)}`);
 };
 
 export const constraintChangeSetToCypher = (
-  { constraint, operation }: ConstraintChangeSet,
+  changeset: ConstraintChangeSet,
   up: boolean
 ): string => {
-  const create = operation === ChangeSetOperationType.Apply ? up : !up;
-
-  if (create) {
-    switch (constraint.type) {
+  if (isCreate(changeset, up)) {
+    switch (changeset.type) {
       case Neo4jIndexOrConstraintType.NodeUniqueProperty:
-        return `CREATE CONSTRAINT ON (n:${constraint.label}) ASSERT n.${
-          constraint.property
+        return `CREATE CONSTRAINT ON (n:${changeset.label}) ASSERT n.${
+          changeset.property
         } IS UNIQUE`;
     }
   } else {
-    switch (constraint.type) {
+    switch (changeset.type) {
       case Neo4jIndexOrConstraintType.NodeUniqueProperty:
-        return `DROP CONSTRAINT ON (n:${constraint.label}) ASSERT n.${
-          constraint.property
-        } IS UNIQUE`;
+        return `DROP CONSTRAINT ON (n:${changeset.label}) ASSERT n.${changeset.property} IS UNIQUE`;
     }
   }
 
-  throw new Error(`Constraint type is not supported: ${JSON.stringify(constraint)}`);
+  throw new Error(`Constraint type is not supported: ${JSON.stringify(changeset)}`);
 };
 
 export const up = (changeSet: ChangeSet): string => {

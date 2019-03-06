@@ -1,5 +1,6 @@
 import { readdirSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
+import getMigrationFileVersion from '../getMigrationFileVersion';
 
 const template = `---
 indexes: []
@@ -11,7 +12,7 @@ export default {
   command: 'create-migration',
   describe: 'creates a new migration file',
   builder: {
-    migrationDir: {
+    ['migration-dir']: {
       alias: 'd',
       default: './migrations',
       describe: 'directory to store migrations in'
@@ -22,8 +23,8 @@ export default {
       describe: 'a name for the migration'
     }
   },
-  handler: (argv: { migrationDir: string; name: string }) => {
-    const dirPath = resolve(process.cwd(), argv.migrationDir);
+  handler: (argv: { ['migration-dir']: string; name: string }) => {
+    const dirPath = resolve(process.cwd(), argv['migration-dir']);
     let files: string[];
 
     try {
@@ -40,14 +41,7 @@ export default {
     const latest = files.sort().pop();
     let latestNumber = 0;
     if (latest) {
-      const matches = latest.match(/^(\d+)-/);
-      if (!matches) {
-        // could probably be smarter about this
-        throw new Error(
-          'Files in the migration directory do not follow naming pattern (###-name.yml)'
-        );
-      }
-      latestNumber = parseInt(matches[0], 10);
+      latestNumber = getMigrationFileVersion(latest);
     }
 
     const filename = `${latestNumber}`.padStart(3, '0') + '-' + argv.name + '.yaml';

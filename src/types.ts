@@ -21,15 +21,15 @@ export type NodeLabelPropertyIndex = {
 export type NodeFulltextIndex = {
   type: Neo4jIndexOrConstraintType.NodeFulltext;
   name: string;
-  labels: string[];
-  properties: string[];
+  labels?: string[];
+  properties?: string[];
 };
 
 export type RelationshipFulltextIndex = {
   type: Neo4jIndexOrConstraintType.RelationshipFulltext;
   name: string;
-  realtionshipTypes: string[];
-  properties: string[];
+  relationshipTypes?: string[];
+  properties?: string[];
 };
 
 export type Index =
@@ -46,9 +46,14 @@ export type NodeUniquePropertyConstraint = {
 
 export type Constraint = NodeUniquePropertyConstraint;
 
+export type CypherMigration = {
+  up: string;
+  down: string;
+};
+
 export enum ChangeSetOperationType {
-  Apply = 'APPLY',
-  Remove = 'REMOVE'
+  Create = 'create',
+  Delete = 'delete'
 }
 
 export enum ChangeSetKind {
@@ -57,23 +62,24 @@ export enum ChangeSetKind {
   Cypher
 }
 
-export type IndexChangeSet = {
+export type IndexChangeSet = Index & {
   kind: ChangeSetKind.Index;
-  operation: ChangeSetOperationType;
-  index: Index;
+  operation?: ChangeSetOperationType; // defaults Apply
 };
 
-export type ConstraintChangeSet = {
+export type ConstraintChangeSet = Constraint & {
   kind: ChangeSetKind.Constraint;
-  operation: ChangeSetOperationType;
-  constraint: Constraint;
+  operation?: ChangeSetOperationType; // defaults Apply
 };
 
-export type CypherChangeSet = {
+export type CypherChangeSet = CypherMigration & {
   kind: ChangeSetKind.Cypher;
-  operation: ChangeSetOperationType.Apply;
-  up: string;
-  down: string;
 };
 
 export type ChangeSet = IndexChangeSet | ConstraintChangeSet | CypherChangeSet;
+
+export type Migration = {
+  indexes: IndexChangeSet[];
+  constraints: ConstraintChangeSet[];
+  cyphers: CypherChangeSet[];
+};

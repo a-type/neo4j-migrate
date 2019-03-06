@@ -19,8 +19,9 @@ Creates a file like this:
 ```yaml
 ---
 indexes:
-  # simple property index
+    # simple property index
   - type: node_label_property
+    operation: create # operation is optional, defaults to create
     label: Person
     properties:
       - id
@@ -32,10 +33,22 @@ indexes:
       - bio
     # fulltext index (Neo4j 3.5+)
   - type: node_fulltext
-    label: Post
+    name: testIndex
+    labels:
+      - Post
     properties:
       - title
       - text
+    # removing a property index
+  - type: node_label_property
+    operation: delete # specify delete as operation
+    label: Person
+    properties:
+      - email
+    # removing a fulltext index (name only required)
+  - type: node_fulltext
+    operation: delete
+    name: oldIndex
 constraints:
   # unique property constraint
   - type: node_unique_property
