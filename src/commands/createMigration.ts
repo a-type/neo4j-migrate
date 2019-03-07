@@ -44,7 +44,7 @@ export default {
       latestNumber = getMigrationFileVersion(latest);
     }
 
-    const filename = `${latestNumber}`.padStart(3, '0') + '-' + argv.name + '.yaml';
+    const filename = `${latestNumber + 1}`.padStart(3, '0') + '-' + argv.name + '.yaml';
 
     writeFileSync(resolve(dirPath, `${filename}`), template);
 
