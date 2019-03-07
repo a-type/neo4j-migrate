@@ -4,7 +4,7 @@ A tool for running immutable migrations on a Neo4J database
 
 ## Usage
 
-> NOTE: this project is in active development. All usage below is still speculative and in progress.
+> NOTE: this project is in active development. All usage below is still speculative and in progress. No guarantees are made that usage will stay consistent in the near future, although semver will be used to indicate breaking changes.
 
 ### Create a migration file
 
@@ -81,3 +81,7 @@ $ npx neo4j-migrate down --url bolt://localhost:7687
 Migrates the database down, UNDOING each migration file in REVERSE order. See `-h` for more options.
 
 Note that Cypher change sets must supply a `down` parameter to be reversed. Otherwise, they will be skipped.
+
+## Future
+
+- [ ] Use APOC's static data storage to store the current schema version, then skip to that version during migration
