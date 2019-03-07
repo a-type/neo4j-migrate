@@ -9,14 +9,14 @@ import {
 
 const extractNodeFulltextIndex = (record: neo4j.Record): NodeFulltextIndex => ({
   type: Neo4jIndexOrConstraintType.NodeFulltext,
-  name: record.get('name'),
+  name: record.get('indexName'),
   labels: record.get('tokenNames'),
   properties: record.get('properties')
 });
 
 const extractRelationshipFulltextIndex = (record: neo4j.Record): RelationshipFulltextIndex => ({
   type: Neo4jIndexOrConstraintType.RelationshipFulltext,
-  name: record.get('name'),
+  name: record.get('indexName'),
   relationshipTypes: record.get('tokenNames'),
   properties: record.get('properties')
 });

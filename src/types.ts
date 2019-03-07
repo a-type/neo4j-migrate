@@ -57,9 +57,9 @@ export enum ChangeSetOperationType {
 }
 
 export enum ChangeSetKind {
-  Index,
-  Constraint,
-  Cypher
+  Index = 'index',
+  Constraint = 'constraint',
+  Cypher = 'cypher'
 }
 
 export type IndexChangeSet = Index & {
@@ -78,11 +78,7 @@ export type CypherChangeSet = CypherMigration & {
 
 export type ChangeSet = IndexChangeSet | ConstraintChangeSet | CypherChangeSet;
 
-export type Migration = {
-  indexes: IndexChangeSet[];
-  constraints: ConstraintChangeSet[];
-  cyphers: CypherChangeSet[];
-};
+export type Migration = ChangeSet[];
 
 export enum MigrationDirection {
   Up,

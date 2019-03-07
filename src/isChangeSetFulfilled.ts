@@ -106,13 +106,25 @@ const isChangeSetSubjectPresent = (
 export default (
   changeSet: ChangeSet,
   existingIndexes: Index[],
-  existingConstraints: Constraint[]
+  existingConstraints: Constraint[],
+  up: boolean
 ): boolean => {
-  const isPresent = isChangeSetSubjectPresent(changeSet, existingIndexes, existingConstraints);
+  let isPresent = isChangeSetSubjectPresent(changeSet, existingIndexes, existingConstraints);
 
+  // cypher is always false
   if (isCypherChangeSet(changeSet)) {
-    return isPresent;
+    return false;
   }
 
-  return changeSet.operation === ChangeSetOperationType.Delete ? !isPresent : isPresent;
+  // invert the whole thing if we are migrating down
+  // there's probably a fancier boolean algebra way to do this
+  if (!up) {
+    isPresent = !isPresent;
+  }
+  // invert again if the operation is to delete
+  if (changeSet.operation === ChangeSetOperationType.Delete) {
+    isPresent = !isPresent;
+  }
+
+  return isPresent;
 };

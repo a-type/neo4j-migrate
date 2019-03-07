@@ -8,10 +8,11 @@ import isChangeSetFulfilled from './isChangeSetFulfilled';
 
 type ConverterFunction = (changeSet: ChangeSet) => string;
 
-export const createApplyFunction = (converter: ConverterFunction) => async (
+export const createApplyFunction = (up: boolean) => async (
   changeSets: ChangeSet[],
   session: neo4j.Session
 ) => {
+  const converter: ConverterFunction = up ? convertUp : convertDown;
   let indexes: Index[] = [];
   let constraints: Constraint[] = [];
 
@@ -31,8 +32,15 @@ export const createApplyFunction = (converter: ConverterFunction) => async (
       async (lastTransaction, { changeSet, cypher }) => {
         await lastTransaction;
 
+        if (!cypher) {
+          console.info(
+            `Skipping ${JSON.stringify(changeSet)}; it did not produce a valid change to apply`
+          );
+          return;
+        }
+
         // double-check if we actually need to run the change set
-        const isFulfilled = isChangeSetFulfilled(changeSet, indexes, constraints);
+        const isFulfilled = isChangeSetFulfilled(changeSet, indexes, constraints, up);
 
         if (isFulfilled) {
           console.info(`Skipping ${cypher}; already fulfilled in existing schema`);
@@ -46,5 +54,5 @@ export const createApplyFunction = (converter: ConverterFunction) => async (
   });
 };
 
-export const up = createApplyFunction(convertUp);
-export const down = createApplyFunction(convertDown);
+export const up = createApplyFunction(true);
+export const down = createApplyFunction(false);

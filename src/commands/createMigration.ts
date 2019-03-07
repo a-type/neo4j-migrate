@@ -49,5 +49,6 @@ export default {
     writeFileSync(resolve(dirPath, `${filename}`), template);
 
     console.info(`Created ${resolve(dirPath, filename)}`);
+    process.exit(0);
   }
 };

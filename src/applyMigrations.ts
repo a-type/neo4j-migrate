@@ -24,9 +24,17 @@ export default async ({ driver, migrationDirPath, version, direction }: ApplyMig
     throw new Error(`Directory not found or not accessible: ${dirPath}`);
   }
 
-  let migrations = files.map(readMigrationFile).sort();
+  // sort in reverse for down
+  let migrations = files
+    .sort(
+      direction === MigrationDirection.Up
+        ? (a: string, b: string) => a.localeCompare(b)
+        : (a: string, b: string) => b.localeCompare(a)
+    )
+    .map(filename => resolve(dirPath, filename))
+    .map(readMigrationFile);
 
-  if (version) {
+  if (version !== undefined) {
     migrations = migrations.filter(migration => migration.version <= version);
   }
 
@@ -37,13 +45,7 @@ export default async ({ driver, migrationDirPath, version, direction }: ApplyMig
       await previousOperationPromise;
 
       console.info(`Applying ${name}...`);
-
-      const allChangeSets: ChangeSet[] = [
-        ...migration.indexes,
-        ...migration.constraints,
-        ...migration.cyphers
-      ];
-      await apply(allChangeSets, session);
+      await apply(migration, session);
     }, Promise.resolve());
   } catch (err) {
     console.error(`Failed to apply migration`);

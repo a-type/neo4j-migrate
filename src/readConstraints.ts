@@ -3,14 +3,33 @@ import { Neo4jIndexOrConstraintType, NodeUniquePropertyConstraint, Constraint } 
 
 const extractNodeUniquePropertyConstraint = (
   record: neo4j.Record
-): NodeUniquePropertyConstraint => ({
-  type: Neo4jIndexOrConstraintType.NodeUniqueProperty,
-  label: record.get('tokenNames')[0],
-  property: record.get('properties')[0]
-});
+): NodeUniquePropertyConstraint | null => {
+  const match = /^CONSTRAINT\s+ON\s+\(\s*\w+:(\w+)\s*\)\s+ASSERT\s+\w+\.(\w+)\s+IS\s+UNIQUE$/;
+  const result = match.exec(record.get('description'));
+
+  if (!result) {
+    return null;
+  }
+
+  const label = result[1];
+  const property = result[2];
+
+  return {
+    type: Neo4jIndexOrConstraintType.NodeUniqueProperty,
+    label,
+    property
+  };
+};
+
+const determineConstraintType = (description: string) => {
+  if (description.endsWith('IS UNIQUE')) {
+    return Neo4jIndexOrConstraintType.NodeUniqueProperty;
+  }
+  return null;
+};
 
 const reshapeConstraint = (record: neo4j.Record): Constraint | null => {
-  const type = record.get('type') as Neo4jIndexOrConstraintType;
+  const type = determineConstraintType(record.get('description'));
 
   switch (type) {
     case Neo4jIndexOrConstraintType.NodeUniqueProperty:
