@@ -11,19 +11,21 @@ export default (config: DriverParams = {}) => {
   const environmentConfig = {
     host: process.env.NEO4J_HOST,
     username: process.env.NEO4J_USERNAME,
-    password: process.env.NEO4J_PASSWORD
+    password: process.env.NEO4J_PASSWORD,
   };
 
   const mergedConfig = {
     ...environmentConfig,
-    ...config
+    ...config,
   };
+
+  console.info(`Connecting to Neo4j on ${mergedConfig.host}`);
 
   return neo4j.driver(
     mergedConfig.host as string,
     mergedConfig.username && mergedConfig.password
       ? neo4j.auth.basic(mergedConfig.username, mergedConfig.password)
       : undefined,
-    mergedConfig.config
+    mergedConfig.config,
   );
 };

@@ -1,0 +1,25 @@
+---
+- kind: index
+  type: node_label_property
+  label: Person
+  properties:
+    - name
+
+- kind: index
+  type: node_label_property
+  label: Post
+  properties:
+    - category
+
+- kind: index
+  type: node_fulltext
+  name: fulltext1
+  labels:
+    - Person
+  properties:
+    - bio
+
+- kind: constraint
+  type: node_unique_property
+  label: Person
+  property: id

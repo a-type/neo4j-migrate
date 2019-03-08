@@ -1,0 +1,16 @@
+---
+- kind: index
+  type: node_label_property
+  operation: delete
+  label: Person
+  properties:
+    - name
+
+- kind: index
+  type: node_fulltext
+  name: fulltext2
+  labels:
+    - Post
+  properties:
+    - text
+    - title
