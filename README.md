@@ -54,12 +54,12 @@ Creates a file like this:
   operation: delete
   name: oldindex
 # unique property constraint
-- kind: Constraint
+- kind: constraint
   type: node_unique_property
   label: Person
   property: id
 # example of arbitrary cypher migration, which may or may not be reversible
-- kind: Cypher
+- kind: cypher
   up: 'MATCH (p:Person) SET p.name = trim(p.name)'
   down: null
 ```
