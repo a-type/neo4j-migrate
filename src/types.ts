@@ -3,7 +3,7 @@ export enum Neo4jIndexOrConstraintType {
   NodeUniqueProperty = 'node_unique_property',
   // RelationshipTypeProperty = 'relationship_type_property',
   NodeFulltext = 'node_fulltext',
-  RelationshipFulltext = 'relationship_fulltext'
+  RelationshipFulltext = 'relationship_fulltext',
 }
 
 export type NodeLabelPropertyIndex = {
@@ -47,19 +47,19 @@ export type NodeUniquePropertyConstraint = {
 export type Constraint = NodeUniquePropertyConstraint;
 
 export type CypherMigration = {
-  up: string;
-  down: string;
+  up: string | null;
+  down: string | null;
 };
 
 export enum ChangeSetOperationType {
   Create = 'create',
-  Delete = 'delete'
+  Delete = 'delete',
 }
 
 export enum ChangeSetKind {
   Index = 'index',
   Constraint = 'constraint',
-  Cypher = 'cypher'
+  Cypher = 'cypher',
 }
 
 export type IndexChangeSet = Index & {
@@ -82,5 +82,5 @@ export type Migration = ChangeSet[];
 
 export enum MigrationDirection {
   Up,
-  Down
+  Down,
 }

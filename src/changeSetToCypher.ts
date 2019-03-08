@@ -3,7 +3,7 @@ import {
   IndexChangeSet,
   Neo4jIndexOrConstraintType,
   ConstraintChangeSet,
-  ChangeSetOperationType
+  ChangeSetOperationType,
 } from './types';
 import { isCypherChangeSet, isIndexChangeSet } from './guards';
 
@@ -16,15 +16,12 @@ export const indexChangeSetToCypher = (changeset: IndexChangeSet, up: boolean): 
       case Neo4jIndexOrConstraintType.NodeLabelProperty:
         return `CREATE INDEX ON :${changeset.label}(${changeset.properties.join(',')})`;
       case Neo4jIndexOrConstraintType.NodeFulltext:
-        if (!changeset.labels || !changeset.properties) {
-          throw new Error(`Label and properties are required for creating fulltext indexes`);
-        }
         return `CALL db.index.fulltext.createNodeIndex(${JSON.stringify(
-          changeset.name
+          changeset.name,
         )},${JSON.stringify(changeset.labels)},${JSON.stringify(changeset.properties)})`;
       case Neo4jIndexOrConstraintType.RelationshipFulltext:
         return `CALL db.index.fulltext.createRelationshipIndex(${JSON.stringify(
-          changeset.name
+          changeset.name,
         )},${JSON.stringify(changeset.relationshipTypes)},${JSON.stringify(changeset.properties)})`;
     }
   } else {
@@ -38,12 +35,13 @@ export const indexChangeSetToCypher = (changeset: IndexChangeSet, up: boolean): 
     }
   }
 
+  /* istanbul ignore next */
   throw new Error(`Index type is not supported: ${JSON.stringify(changeset)}`);
 };
 
 export const constraintChangeSetToCypher = (
   changeset: ConstraintChangeSet,
-  up: boolean
+  up: boolean,
 ): string => {
   if (isCreate(changeset, up)) {
     switch (changeset.type) {
@@ -59,10 +57,11 @@ export const constraintChangeSetToCypher = (
     }
   }
 
+  /* istanbul ignore next */
   throw new Error(`Constraint type is not supported: ${JSON.stringify(changeset)}`);
 };
 
-export const up = (changeSet: ChangeSet): string => {
+export const up = (changeSet: ChangeSet): string | null => {
   if (isCypherChangeSet(changeSet)) {
     return changeSet.up;
   } else if (isIndexChangeSet(changeSet)) {
@@ -72,7 +71,7 @@ export const up = (changeSet: ChangeSet): string => {
   }
 };
 
-export const down = (changeSet: ChangeSet): string => {
+export const down = (changeSet: ChangeSet): string | null => {
   if (isCypherChangeSet(changeSet)) {
     return changeSet.down;
   } else if (isIndexChangeSet(changeSet)) {

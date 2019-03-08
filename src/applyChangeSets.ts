@@ -6,11 +6,11 @@ import readIndexes from './readIndexes';
 import readConstraints from './readConstraints';
 import isChangeSetFulfilled from './isChangeSetFulfilled';
 
-type ConverterFunction = (changeSet: ChangeSet) => string;
+type ConverterFunction = (changeSet: ChangeSet) => string | null;
 
 export const createApplyFunction = (up: boolean) => async (
   changeSets: ChangeSet[],
-  session: neo4j.Session
+  session: neo4j.Session,
 ) => {
   const converter: ConverterFunction = up ? convertUp : convertDown;
   let indexes: Index[] = [];
@@ -24,7 +24,7 @@ export const createApplyFunction = (up: boolean) => async (
   }
 
   await session.writeTransaction(async tx => {
-    const changeSetsWithCypher: { changeSet: ChangeSet; cypher: string }[] = changeSets
+    const changeSetsWithCypher: { changeSet: ChangeSet; cypher: string | null }[] = changeSets
       .map(converter)
       .map((cypher, index) => ({ cypher, changeSet: changeSets[index] }));
 
@@ -34,7 +34,7 @@ export const createApplyFunction = (up: boolean) => async (
 
         if (!cypher) {
           console.info(
-            `Skipping ${JSON.stringify(changeSet)}; it did not produce a valid change to apply`
+            `Skipping ${JSON.stringify(changeSet)}; it did not produce a valid change to apply`,
           );
           return;
         }
@@ -49,7 +49,7 @@ export const createApplyFunction = (up: boolean) => async (
 
         return tx.run(cypher);
       },
-      Promise.resolve()
+      Promise.resolve(),
     );
   });
 };
