@@ -3,9 +3,56 @@ import { resolve } from 'path';
 import getMigrationFileVersion from '../getMigrationFileVersion';
 
 const template = `---
-indexes: []
-constraints: []
-cyphers: []
+# simple property index
+# - kind: index
+#   type: node_label_property
+#   operation: create # operation is optional, defaults to create
+#   label: Person
+#   properties:
+#     - id
+
+# compound property index
+# - kind: index
+#   type: node_label_property
+#   label: Person
+#   properties:
+#     - name
+#     - bio
+
+# fulltext index (Neo4j 3.5+)
+# - kind: index
+#   type: node_fulltext
+#   name: testindex
+#   labels:
+#     - Post
+#   properties:
+#     - title
+#     - text
+
+# removing a property index
+# - kind: index
+#   type: node_label_property
+#   operation: delete # specify delete as operation
+#   label: Person
+#   properties:
+#     - email
+
+# removing a fulltext index (name only required)
+# - kind: index
+#   type: node_fulltext
+#   operation: delete
+#   name: oldindex
+
+# unique property constraint
+# - kind: Constraint
+#   type: node_unique_property
+#   label: Person
+#   property: id
+
+# example of arbitrary cypher migration, which may or may not be reversible
+# - kind: Cypher
+#   up: 'MATCH (p:Person) SET p.name = trim(p.name)'
+#   down: null
 `;
 
 export default {
