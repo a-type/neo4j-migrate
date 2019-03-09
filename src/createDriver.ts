@@ -15,8 +15,10 @@ export default (config: DriverParams = {}) => {
   };
 
   const mergedConfig = {
-    ...environmentConfig,
     ...config,
+    host: config.host || environmentConfig.host,
+    username: config.username || environmentConfig.username,
+    password: config.password || environmentConfig.password,
   };
 
   console.info(`Connecting to Neo4j on ${mergedConfig.host}`);
