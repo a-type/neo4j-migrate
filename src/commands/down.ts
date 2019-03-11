@@ -1,15 +1,4 @@
-import createDriver from '../createDriver';
-import { MigrationDirection } from '../types';
-import applyMigrations from '../applyMigrations';
-
-type DownArgs = {
-  ['migration-dir']: string;
-  target: string;
-  url: string;
-  username: string;
-  password: string;
-  ['neo4j-config']: string;
-};
+import { down } from '../neo4j-migrate';
 
 export default {
   command: 'down',
@@ -18,46 +7,40 @@ export default {
     ['migration-dir']: {
       alias: 'd',
       default: './migrations',
-      describe: '[d]irectory where migrations are stored'
+      describe: '[d]irectory where migrations are stored',
     },
     target: {
       alias: 't',
-      describe: '[t]arget version to migrate down to (defaults latest)'
+      describe: '[t]arget version to migrate down to (defaults latest)',
     },
     url: {
-      describe: 'the url (host and port) of the Neo4j database'
+      describe: 'the url (host and port) of the Neo4j database',
     },
     username: {
       alias: 'u',
       describe: '[u]sername for the Neo4j database',
-      default: 'neo4j'
+      default: 'neo4j',
     },
     password: {
       alias: 'p',
-      describe: '[p]assword for the Neo4j database (omit for no credentials)'
+      describe: '[p]assword for the Neo4j database (omit for no credentials)',
     },
     ['neo4j-config']: {
       alias: 'c',
-      describe: 'json string of neo4j-driver [c]onfig'
-    }
+      describe: 'json string of neo4j-driver [c]onfig',
+    },
+    force: {
+      alias: 'f',
+      describe:
+        '[f]orce applying all migrations from the beginning, ignoring stored current migration bookmark',
+    },
   },
-  handler: async (argv: DownArgs) => {
-    const config = argv['neo4j-config'] ? JSON.parse(argv['neo4j-config']) : undefined;
-
-    const driver = createDriver({
-      host: argv.url,
-      username: argv.username,
-      password: argv.password,
-      config
+  handler: async ({ neo4jConfig, ...rest }: any) => {
+    const config = neo4jConfig ? JSON.parse(neo4jConfig) : undefined;
+    await down({
+      ...rest,
+      neo4jConfig: config,
     });
-
-    await applyMigrations({
-      driver,
-      migrationDirPath: argv['migration-dir'],
-      version: argv.target !== undefined ? parseInt(argv.target, 10) : undefined,
-      direction: MigrationDirection.Down
-    });
-
     process.exit(0);
-  }
+  },
 };

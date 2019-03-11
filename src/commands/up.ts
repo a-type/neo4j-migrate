@@ -1,33 +1,4 @@
-import createDriver from '../createDriver';
-import { MigrationDirection } from '../types';
-import applyMigrations from '../applyMigrations';
-
-type UpArgs = {
-  ['migration-dir']: string;
-  target?: string;
-  url?: string;
-  username: string;
-  password?: string;
-  ['neo4j-config']?: string;
-};
-
-export const handler = async (argv: UpArgs) => {
-  const config = argv['neo4j-config'] ? JSON.parse(argv['neo4j-config']) : undefined;
-
-  const driver = createDriver({
-    host: argv.url,
-    username: argv.username,
-    password: argv.password,
-    config,
-  });
-
-  await applyMigrations({
-    driver,
-    migrationDirPath: argv['migration-dir'],
-    version: argv.target !== undefined ? parseInt(argv.target, 10) : undefined,
-    direction: MigrationDirection.Up,
-  });
-};
+import { up } from '../neo4j-migrate';
 
 export default {
   command: 'up',
@@ -58,9 +29,18 @@ export default {
       alias: 'c',
       describe: 'json string of neo4j-driver config',
     },
+    force: {
+      alias: 'f',
+      describe:
+        '[f]orce applying all migrations from the beginning, ignoring stored current migration bookmark',
+    },
   },
-  handler: async (argv: UpArgs) => {
-    await handler(argv);
+  handler: async ({ neo4jConfig, ...rest }: any) => {
+    const config = neo4jConfig ? JSON.parse(neo4jConfig) : undefined;
+    await up({
+      ...rest,
+      neo4jConfig: config,
+    });
     process.exit();
   },
 };

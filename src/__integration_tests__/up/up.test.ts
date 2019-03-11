@@ -1,10 +1,10 @@
 import { v1 as neo4j } from 'neo4j-driver';
 import { initialize, cleanup } from '../neo4j/manage';
-import { handler as up } from '../../up';
+import { up } from '../../neo4j-migrate';
 import { resolve } from 'path';
-import readIndexes from '../../../readIndexes';
-import readConstraints from '../../../readConstraints';
-import { Neo4jIndexOrConstraintType } from '../../../types';
+import readIndexes from '../../readIndexes';
+import readConstraints from '../../readConstraints';
+import { Neo4jIndexOrConstraintType } from '../../types';
 
 describe('the up command', async () => {
   const driver = neo4j.driver('bolt://localhost:7687');
@@ -32,7 +32,7 @@ describe('the up command', async () => {
     await initialize();
 
     await up({
-      ['migration-dir']: resolve(__dirname, './migrations'),
+      migrationDir: resolve(__dirname, './migrations'),
       url: 'bolt://localhost:7687',
       username: 'neo4j',
     });

@@ -54,5 +54,5 @@ export const createApplyFunction = (up: boolean) => async (
   });
 };
 
-export const up = createApplyFunction(true);
-export const down = createApplyFunction(false);
+export const applyChangesetsUp = createApplyFunction(true);
+export const applyChangesetsDown = createApplyFunction(false);

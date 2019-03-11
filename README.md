@@ -6,7 +6,21 @@ A tool for running immutable migrations on a Neo4J database
 
 > NOTE: this project is in active development. All usage below is still speculative and in progress. No guarantees are made that usage will stay consistent in the near future, although semver will be used to indicate breaking changes.
 
-### Create a migration file
+### Environment Variables
+
+Certain environment variables can be defined to supply common parameters:
+
+```
+NEO4J_HOST=bolt://your-neo4j-host:7687
+NEO4J_USERNAME=neo4j|your_username
+NEO4J_PASSWORD=your_password
+```
+
+All of these parameters can also be supplied via the CLI or module usage, and will override environment parameters if you do so.
+
+### CLI
+
+#### Create a migration file
 
 ```
 $ npx neo4j-migrate create-migration --name=example-migration ./migrations
@@ -64,7 +78,7 @@ Creates a file like this:
   down: null
 ```
 
-### Migrate up
+#### Migrate up
 
 ```
 $ npx neo4j-migrate up --url bolt://localhost:7687
@@ -72,7 +86,7 @@ $ npx neo4j-migrate up --url bolt://localhost:7687
 
 Migrates the database up, running each migration file in order. See `-h` for more options.
 
-### Migrate down
+#### Migrate down
 
 ```
 $ npx neo4j-migrate down --url bolt://localhost:7687
@@ -82,6 +96,52 @@ Migrates the database down, UNDOING each migration file in REVERSE order. See `-
 
 Note that Cypher change sets must supply a `down` parameter to be reversed. Otherwise, they will be skipped.
 
+### Module
+
+#### Migrate up
+
+```ts
+import * as path from 'path';
+import { up } from 'neo4j-migrate';
+
+await up({
+  // all parameters optional
+  migrationDir: path.resolve(process.cwd(), 'migrations'),
+  target: 3,
+  url: 'bolt://localhost:7687',
+  username: 'neo4j',
+  password: 'secret',
+  neo4jConfig: {
+    logging: {
+      level: 'debug',
+    },
+  },
+  force: true,
+});
+```
+
+#### Migrate down
+
+```ts
+import * as path from 'path';
+import { down } from 'neo4j-migrate';
+
+await down({
+  // all parameters optional
+  migrationDir: path.resolve(process.cwd(), 'migrations'),
+  target: 3,
+  url: 'bolt://localhost:7687',
+  username: 'neo4j',
+  password: 'secret',
+  neo4jConfig: {
+    logging: {
+      level: 'debug',
+    },
+  },
+  force: true,
+});
+```
+
 ## Future
 
-- [ ] Use APOC's static data storage to store the current schema version, then skip to that version during migration
+- [x] Use APOC's static data storage to store the current schema version, then skip to that version during migration

@@ -21,13 +21,9 @@ export default (config: DriverParams = {}) => {
     password: config.password || environmentConfig.password,
   };
 
-  if (mergedConfig.username && !mergedConfig.password) {
-    throw new Error('If Neo4j username is supplied, password must also be supplied.');
-  }
-
   console.info(
     `Connecting to Neo4j on ${mergedConfig.host} ${
-      mergedConfig.username ? 'with credentials' : 'without credentials'
+      mergedConfig.password ? 'with credentials' : 'without credentials'
     }`,
   );
 

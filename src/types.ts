@@ -84,3 +84,9 @@ export enum MigrationDirection {
   Up,
   Down,
 }
+
+export type MigrationFile = {
+  migration: Migration;
+  version: number;
+  name: string;
+};

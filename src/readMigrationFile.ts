@@ -1,14 +1,8 @@
 import { readFileSync } from 'fs';
 import { parse } from 'yaml';
-import { Migration, ChangeSetKind } from './types';
+import { Migration, MigrationFile, ChangeSetKind } from './types';
 import getMigrationFileVersion from './getMigrationFileVersion';
 import { sep } from 'path';
-
-export type MigrationFile = {
-  migration: Migration;
-  version: number;
-  name: string;
-};
 
 const validKinds = [ChangeSetKind.Index, ChangeSetKind.Constraint, ChangeSetKind.Cypher];
 
@@ -30,10 +24,10 @@ export default (filePath: string): MigrationFile => {
     return {
       name: fileName,
       version: getMigrationFileVersion(fileName),
-      migration: parsed
+      migration: parsed,
     };
   } catch (err) {
-    console.error(`Failed to read migration file: ${filePath}`);
+    console.error(`Failed to read migration file: ${filePath}, ${err.message}`);
     throw err;
   }
 };
