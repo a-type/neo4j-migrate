@@ -29,9 +29,9 @@ export const indexChangeSetToCypher = (changeset: IndexChangeSet, up: boolean): 
       case Neo4jIndexOrConstraintType.NodeLabelProperty:
         return `DROP INDEX ON :${changeset.label}(${changeset.properties.join(',')})`;
       case Neo4jIndexOrConstraintType.NodeFulltext:
-        return `CALL db.index.fulltext.deleteNodeIndex(${JSON.stringify(changeset.name)})`;
+        return `CALL db.index.fulltext.drop(${JSON.stringify(changeset.name)})`;
       case Neo4jIndexOrConstraintType.RelationshipFulltext:
-        return `CALL db.index.fulltext.deleteRelationshipIndex(${JSON.stringify(changeset.name)})`;
+        return `CALL db.index.fulltext.drop(${JSON.stringify(changeset.name)})`;
     }
   }
 

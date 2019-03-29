@@ -151,7 +151,7 @@ describe('changeSetToCypher', () => {
               labels: ['Person'],
               properties: ['name', 'bio'],
             }),
-          ).toEqual('CALL db.index.fulltext.deleteNodeIndex("fulltext")');
+          ).toEqual('CALL db.index.fulltext.drop("fulltext")');
         });
       });
 
@@ -166,7 +166,7 @@ describe('changeSetToCypher', () => {
               labels: ['Person'],
               properties: ['name', 'bio'],
             }),
-          ).toEqual('CALL db.index.fulltext.deleteNodeIndex("fulltext")');
+          ).toEqual('CALL db.index.fulltext.drop("fulltext")');
         });
 
         it('converts down', () => {
@@ -209,7 +209,7 @@ describe('changeSetToCypher', () => {
               relationshipTypes: ['FRIENDS_WITH'],
               properties: ['level', 'quality'],
             }),
-          ).toEqual('CALL db.index.fulltext.deleteRelationshipIndex("fulltext")');
+          ).toEqual('CALL db.index.fulltext.drop("fulltext")');
         });
       });
 
@@ -224,7 +224,7 @@ describe('changeSetToCypher', () => {
               relationshipTypes: ['FRIENDS_WITH'],
               properties: ['level', 'quality'],
             }),
-          ).toEqual('CALL db.index.fulltext.deleteRelationshipIndex("fulltext")');
+          ).toEqual('CALL db.index.fulltext.drop("fulltext")');
         });
 
         it('converts down', () => {
