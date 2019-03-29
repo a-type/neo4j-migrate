@@ -7,7 +7,7 @@ import {
   NodeFulltextIndex,
   RelationshipFulltextIndex,
   NodeUniquePropertyConstraint,
-  ChangeSetOperationType
+  ChangeSetOperationType,
 } from './types';
 import { isCypherChangeSet, isIndexChangeSet, isConstraintChangeSet } from './guards';
 
@@ -19,9 +19,9 @@ export const areSetsEqual = (setA: string[], setB: string[]): boolean => {
   const [ok, withoutB] = setB.reduce<[boolean, string[]]>(
     ([okSoFar, prev], item) => {
       const without = prev.filter(entry => entry !== item);
-      return [without.length === prev.length - 1, without];
+      return [okSoFar && without.length === prev.length - 1, without];
     },
-    [true, [...setA]]
+    [true, [...setA]],
   );
 
   return ok && withoutB.length === 0;
@@ -31,7 +31,7 @@ export const areSetsEqual = (setA: string[], setB: string[]): boolean => {
 const isChangeSetSubjectPresent = (
   changeSet: ChangeSet,
   existingIndexes: Index[],
-  existingConstraints: Constraint[]
+  existingConstraints: Constraint[],
 ): boolean => {
   // we can't really track whether a cypher operation is already 'fulfilled' in the schema
   if (isCypherChangeSet(changeSet)) {
@@ -52,29 +52,10 @@ const isChangeSetSubjectPresent = (
           );
         case Neo4jIndexOrConstraintType.NodeFulltext:
           const existingNodeFulltext = existingIndex as NodeFulltextIndex;
-          return (
-            existingNodeFulltext.name === changeSet.name &&
-            (!!existingNodeFulltext.labels &&
-              !!changeSet.labels &&
-              areSetsEqual(existingNodeFulltext.labels, changeSet.labels)) &&
-            (!!existingNodeFulltext.properties &&
-              !!changeSet.properties &&
-              areSetsEqual(existingNodeFulltext.properties, changeSet.properties))
-          );
+          return existingNodeFulltext.name === changeSet.name;
         case Neo4jIndexOrConstraintType.RelationshipFulltext:
           const existingRelationshipFulltext = existingIndex as RelationshipFulltextIndex;
-          return (
-            (existingIndex as RelationshipFulltextIndex).name === changeSet.name &&
-            (!!existingRelationshipFulltext.relationshipTypes &&
-              !!changeSet.relationshipTypes &&
-              areSetsEqual(
-                existingRelationshipFulltext.relationshipTypes,
-                changeSet.relationshipTypes
-              )) &&
-            (!!existingRelationshipFulltext.properties &&
-              !!changeSet.properties &&
-              areSetsEqual(existingRelationshipFulltext.properties, changeSet.properties))
-          );
+          return existingRelationshipFulltext.name === changeSet.name;
         default:
           return false;
       }
@@ -107,7 +88,7 @@ export default (
   changeSet: ChangeSet,
   existingIndexes: Index[],
   existingConstraints: Constraint[],
-  up: boolean
+  up: boolean,
 ): boolean => {
   let isPresent = isChangeSetSubjectPresent(changeSet, existingIndexes, existingConstraints);
 
