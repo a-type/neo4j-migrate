@@ -1,6 +1,6 @@
 {
   "name": "neo4j-migrate",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "keywords": [],
   "main": "dist/neo4j-migrate.umd.js",
