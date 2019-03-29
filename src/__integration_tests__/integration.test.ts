@@ -1,10 +1,10 @@
 import { v1 as neo4j } from 'neo4j-driver';
-import { initialize, cleanup } from '../neo4j/manage';
-import { up } from '../../neo4j-migrate';
+import { initialize, cleanup } from './neo4j/manage';
+import { up, down } from '../neo4j-migrate';
 import { resolve } from 'path';
-import readIndexes from '../../readIndexes';
-import readConstraints from '../../readConstraints';
-import { Neo4jIndexOrConstraintType } from '../../types';
+import readIndexes from '../readIndexes';
+import readConstraints from '../readConstraints';
+import { Neo4jIndexOrConstraintType } from '../types';
 
 describe('the up command', async () => {
   const driver = neo4j.driver('bolt://localhost:7687');
@@ -19,6 +19,7 @@ describe('the up command', async () => {
     if (session) {
       await session.close();
     }
+    await cleanup();
     done();
   });
 
@@ -67,5 +68,33 @@ describe('the up command', async () => {
         property: 'id',
       },
     ]);
+
+    await driver.close();
+    await cleanup();
+  }, 30000);
+
+  test('rolling back', async () => {
+    await initialize();
+
+    await up({
+      migrationDir: resolve(__dirname, './migrations'),
+      url: 'bolt://localhost:7687',
+      username: 'neo4j',
+    });
+
+    await down({
+      migrationDir: resolve(__dirname, './migrations'),
+      url: 'bolt://localhost:7687',
+      username: 'neo4j',
+    });
+
+    const indexes = await readIndexes(session);
+    const constraints = await readConstraints(session);
+
+    expect(indexes).toEqual([]);
+    expect(constraints).toEqual([]);
+
+    await driver.close();
+    await cleanup();
   }, 30000);
 });
