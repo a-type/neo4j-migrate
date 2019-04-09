@@ -9,6 +9,7 @@ export const getStoredVersion = async (session: neo4j.Session): Promise<number |
       const stringVer = result.records[0].get('value') as string;
       const intVer = parseInt(stringVer, 10);
       if (isNaN(intVer)) {
+        console.warn(`Stored version bookmark was not a number: ${stringVer}`);
         return null;
       }
       console.info(`Found current version bookmark: ${intVer}`);
