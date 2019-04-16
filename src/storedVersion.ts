@@ -1,21 +1,24 @@
 import { v1 as neo4j } from 'neo4j-driver';
 
-const VERSION_KEY = 'neo4j_migrate_current_version';
-
 export const getStoredVersion = async (session: neo4j.Session): Promise<number | null> => {
   return session.readTransaction(async tx => {
     try {
-      const result = await tx.run(`CALL apoc.static.get("${VERSION_KEY}")`);
-      const stringVer = result.records[0].get('value') as string;
-      const intVer = parseInt(stringVer, 10);
-      if (isNaN(intVer)) {
+      const result = await tx.run(`MATCH (store:Neo4jMigrateStorage) RETURN store { .version }`);
+      if (!result.records[0]) {
         return null;
       }
-      console.info(`Found current version bookmark: ${intVer}`);
-      return intVer;
+      const store = result.records[0].get('store');
+      if (store && store.version !== undefined && store.version !== null) {
+        console.info(`Found current version bookmark: ${store.version}`);
+        return store.version;
+      } else {
+        console.warn(`Found migration storage in database, but no version`, store);
+        return null;
+      }
     } catch (err) {
       console.info(
-        `Could not use APOC to retrieve static value for database version. Proceeding without version bookmark.`,
+        `Could not retrieve current database version. Proceeding without version bookmark.`,
+        err,
       );
       return null;
     }
@@ -25,11 +28,14 @@ export const getStoredVersion = async (session: neo4j.Session): Promise<number |
 export const setStoredVersion = async (session: neo4j.Session, version: number): Promise<void> => {
   await session.writeTransaction(async tx => {
     try {
-      await tx.run(`CALL apoc.static.set("${VERSION_KEY}", $version)`, { version });
-      console.info(`Stored current version bookmark in database static value "${VERSION_KEY}".`);
+      await tx.run(`MERGE (store:Neo4jMigrateStorage) SET store.version = $version RETURN store`, {
+        version,
+      });
+      console.info(`Stored current version bookmark in database. (version: ${version})`);
     } catch (err) {
       console.info(
-        `Could not use APOC to store static value for database version. Proceeding without bookmarking version.`,
+        `Could not store database version. Proceeding without bookmarking version.`,
+        err,
       );
     }
   });

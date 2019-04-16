@@ -18,6 +18,12 @@ NEO4J_PASSWORD=your_password
 
 All of these parameters can also be supplied via the CLI or module usage, and will override environment parameters if you do so.
 
+### Version bookmarking
+
+By default, this tool will store a version bookmark in a node inside your graph with a `:Neo4jMigrateStorage` label. This bookmark is used to avoid re-applying migrations upon future `up` or `down` commands. While the default migrations should all be basically idempotent, custom Cypher migrations may not be, plus it's just faster.
+
+If you want to disable this behavior, pass the `--force` flag. If you'd like to store the version bookmark in a different place, feel free to open a PR.
+
 ### CLI
 
 #### Create a migration file
@@ -141,7 +147,3 @@ await down({
   force: true,
 });
 ```
-
-## Future
-
-- [x] Use APOC's static data storage to store the current schema version, then skip to that version during migration
